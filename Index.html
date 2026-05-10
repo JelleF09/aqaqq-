@@ -1,9 +1,1120 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Site</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vela — The Operating System for Human Potential</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2ec;
+    --cream: #faf8f4;
+    --gold: #c8a96e;
+    --gold-light: #e8d4a8;
+    --muted: #6b6760;
+    --border: rgba(10,10,15,0.1);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- CURSOR ---- */
+  body { cursor: none; }
+  #cursor {
+    position: fixed; top: 0; left: 0; width: 10px; height: 10px;
+    background: var(--ink); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+  }
+  #cursor-ring {
+    position: fixed; top: 0; left: 0; width: 36px; height: 36px;
+    border: 1px solid var(--ink); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.4s cubic-bezier(.16,1,.3,1), width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+    opacity: 0.5;
+  }
+  body:has(a:hover) #cursor, body:has(button:hover) #cursor { width: 6px; height: 6px; background: var(--gold); }
+  body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { width: 56px; height: 56px; opacity: 0.25; }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px;
+    height: 72px;
+    background: rgba(245,242,236,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 36px; align-items: center; }
+  .nav-links a {
+    font-size: 0.875rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink) !important;
+    color: var(--cream) !important;
+    padding: 10px 24px !important;
+    border-radius: 2px !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--gold) !important; color: var(--ink) !important; }
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--ink); }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, #e8d4a820 0%, transparent 70%),
+                radial-gradient(ellipse 50% 80% at 10% 90%, #c8a96e10 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 0%, black 40%, transparent 100%);
+    opacity: 0.4;
+  }
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-headline {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+  }
+  .hero-headline em { font-style: italic; color: var(--gold); }
+  .hero-sub {
+    margin-top: 36px;
+    font-size: 1.125rem;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.7;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+  .hero-actions {
+    display: flex; gap: 16px; align-items: center;
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s forwards;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 16px 36px;
+    border: none; border-radius: 2px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--gold); color: var(--ink); transform: translateY(-2px); }
+  .btn-ghost {
+    color: var(--ink);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: gap 0.2s;
+  }
+  .btn-ghost:hover { gap: 14px; }
+  .btn-ghost::after { content: '→'; }
+  .hero-scroll {
+    position: absolute; bottom: 48px; right: 48px;
+    writing-mode: vertical-rl;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0;
+    animation: fadeIn 1s 1.2s forwards;
+  }
+  .hero-scroll::before {
+    content: '';
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--muted));
+    animation: scrollLine 2s 1.5s infinite;
+  }
+  @keyframes scrollLine { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.3)} }
+
+  /* Ticker */
+  .ticker-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 14px 0;
+    background: var(--ink);
+  }
+  .ticker {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: ticker 28s linear infinite;
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 32px;
+    padding: 0 40px;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+  }
+  .ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* ---- NUMBERS ---- */
+  .numbers {
+    padding: 120px 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .number-card {
+    background: var(--cream);
+    padding: 48px 40px;
+  }
+  .number-card .num {
+    font-family: var(--serif);
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+  .number-card .num span { color: var(--gold); }
+  .number-card .label {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---- ABOUT ---- */
+  .about {
+    padding: 140px 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .about-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  .about-headline {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+  .about-headline em { font-style: italic; }
+  .about-body {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-top: 28px;
+  }
+  .about-body p + p { margin-top: 16px; }
+  .about-visual {
+    position: relative;
+    aspect-ratio: 4/5;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .about-visual-inner {
+    position: absolute; inset: 20px;
+    background: linear-gradient(135deg, var(--ink) 0%, #2a2822 100%);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 36px;
+  }
+  .about-visual-chart {
+    display: flex; align-items: flex-end; gap: 8px;
+    height: 120px; margin-bottom: 24px;
+  }
+  .chart-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--gold), var(--gold-light));
+    border-radius: 2px 2px 0 0;
+    opacity: 0.85;
+    transition: opacity 0.3s;
+  }
+  .chart-bar:hover { opacity: 1; }
+  .about-visual-text { color: var(--gold-light); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .about-visual-num { font-family: var(--serif); font-size: 2.5rem; color: #fff; letter-spacing: -0.04em; margin-top: 4px; }
+  .about-visual-tag {
+    position: absolute; top: 20px; right: 20px;
+    background: var(--gold); color: var(--ink);
+    font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 6px 12px;
+  }
+
+  /* ---- FEATURES ---- */
+  .features { padding: 120px 48px; background: var(--ink); }
+  .section-header { text-align: center; margin-bottom: 80px; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 20px;
+  }
+  .section-headline {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.1; letter-spacing: -0.025em;
+    color: var(--cream);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .feature-card {
+    background: var(--ink);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .feature-card:hover { background: #141410; }
+  .feature-card:hover::before { transform: scaleX(1); }
+  .feature-num {
+    font-family: var(--serif); font-size: 3rem;
+    color: rgba(200,169,110,0.2); line-height: 1;
+    margin-bottom: 24px; letter-spacing: -0.04em;
+  }
+  .feature-title {
+    font-family: var(--serif); font-size: 1.4rem;
+    color: var(--cream); margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .feature-body { font-size: 0.9rem; color: rgba(245,242,236,0.5); line-height: 1.7; font-weight: 300; }
+  .feature-tag {
+    display: inline-block; margin-top: 24px;
+    font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid rgba(200,169,110,0.3);
+    padding: 5px 12px;
+  }
+
+  /* ---- PROCESS ---- */
+  .process { padding: 140px 48px; }
+  .process-steps { margin-top: 80px; }
+  .process-step {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+    padding: 48px 0;
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+  .step-num {
+    font-family: var(--serif); font-size: 3rem;
+    color: var(--border); letter-spacing: -0.04em;
+    line-height: 1; padding-top: 4px;
+  }
+  .step-title {
+    font-family: var(--serif); font-size: 1.6rem;
+    letter-spacing: -0.025em; line-height: 1.2;
+  }
+  .step-body { font-size: 0.95rem; color: var(--muted); line-height: 1.75; font-weight: 300; }
+
+  /* ---- TESTIMONIALS ---- */
+  .testimonials { padding: 120px 48px; background: var(--paper); }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 72px;
+  }
+  .testimonial-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    padding: 40px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+  .testimonial-quote {
+    font-family: var(--serif); font-size: 1.15rem;
+    line-height: 1.65; letter-spacing: -0.01em;
+    margin-bottom: 32px;
+    color: var(--ink);
+  }
+  .testimonial-author { display: flex; align-items: center; gap: 14px; }
+  .author-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--ink));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); color: var(--cream); font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .author-name { font-size: 0.85rem; font-weight: 500; }
+  .author-role { font-size: 0.75rem; color: var(--muted); margin-top: 2px; letter-spacing: 0.02em; }
+  .stars { display: flex; gap: 3px; margin-bottom: 20px; }
+  .star { color: var(--gold); font-size: 0.75rem; }
+
+  /* ---- PRICING ---- */
+  .pricing { padding: 120px 48px; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 72px;
+    align-items: end;
+  }
+  .pricing-card {
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    position: relative;
+    transition: transform 0.3s;
+  }
+  .pricing-card.featured {
+    background: var(--ink);
+    border-color: var(--gold);
+    transform: translateY(-16px);
+  }
+  .pricing-card:not(.featured):hover { transform: translateY(-4px); }
+  .pricing-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: var(--ink);
+    font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 5px 16px; white-space: nowrap;
+  }
+  .pricing-tier {
+    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 20px;
+  }
+  .pricing-price {
+    font-family: var(--serif);
+    font-size: 3.5rem; line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 8px;
+  }
+  .pricing-card.featured .pricing-price { color: var(--cream); }
+  .pricing-price sup { font-size: 1.5rem; vertical-align: top; margin-top: 8px; }
+  .pricing-period { font-size: 0.8rem; color: var(--muted); margin-bottom: 36px; }
+  .pricing-card.featured .pricing-period { color: rgba(245,242,236,0.5); }
+  .pricing-features { list-style: none; margin-bottom: 40px; }
+  .pricing-features li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.875rem;
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted);
+  }
+  .pricing-card.featured .pricing-features li { color: rgba(245,242,236,0.7); border-color: rgba(255,255,255,0.08); }
+  .pricing-features li::before { content: '✓'; color: var(--gold); font-size: 0.75rem; }
+  .btn-outline {
+    display: block; width: 100%; text-align: center;
+    padding: 14px; border: 1px solid var(--ink);
+    font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none; color: var(--ink);
+    transition: background 0.2s, color 0.2s;
+    cursor: pointer; background: transparent; font-family: var(--sans);
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--cream); }
+  .pricing-card.featured .btn-outline {
+    border-color: var(--gold); color: var(--gold);
+  }
+  .pricing-card.featured .btn-outline:hover { background: var(--gold); color: var(--ink); }
+
+  /* ---- FAQ ---- */
+  .faq { padding: 120px 48px; background: var(--paper); }
+  .faq-list { max-width: 760px; margin: 72px auto 0; }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-question {
+    width: 100%; background: none; border: none;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 0; cursor: pointer;
+    font-family: var(--sans); font-size: 1rem; text-align: left;
+    color: var(--ink); letter-spacing: -0.01em;
+  }
+  .faq-icon { font-size: 1.2rem; color: var(--gold); transition: transform 0.3s; flex-shrink: 0; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-answer {
+    font-size: 0.9rem; color: var(--muted); line-height: 1.8; font-weight: 300;
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+  }
+  .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 24px; }
+
+  /* ---- CTA BANNER ---- */
+  .cta-banner {
+    padding: 120px 48px;
+    background: var(--ink);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(200,169,110,0.08) 0%, transparent 70%);
+  }
+  .cta-banner .section-headline { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.0; margin-bottom: 28px; }
+  .cta-banner .section-headline em { font-style: italic; color: var(--gold); }
+  .cta-sub { font-size: 1.05rem; color: rgba(245,242,236,0.5); font-weight: 300; max-width: 480px; margin: 0 auto 48px; }
+  .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--ink);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 64px 48px 40px;
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 64px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .footer-brand .nav-logo { color: var(--cream); display: block; margin-bottom: 16px; }
+  .footer-desc { font-size: 0.85rem; color: rgba(245,242,236,0.4); line-height: 1.7; font-weight: 300; }
+  .footer-col h4 {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(245,242,236,0.3); margin-bottom: 20px;
+  }
+  .footer-col a {
+    display: block; color: rgba(245,242,236,0.5);
+    text-decoration: none; font-size: 0.85rem; line-height: 1;
+    padding: 7px 0; transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--gold); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 28px;
+    font-size: 0.75rem; color: rgba(245,242,236,0.25);
+  }
+  .footer-legal { display: flex; gap: 24px; }
+  .footer-legal a { color: rgba(245,242,236,0.25); text-decoration: none; transition: color 0.2s; }
+  .footer-legal a:hover { color: rgba(245,242,236,0.6); }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---- MOBILE NAV ---- */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 72px; left: 0; right: 0;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 48px;
+    flex-direction: column; gap: 16px;
+    z-index: 99;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-size: 1rem; color: var(--ink);
+    text-decoration: none; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 1024px) {
+    .numbers { grid-template-columns: repeat(2, 1fr); }
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+    .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+    .pricing-card.featured { transform: none; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .hero { padding: 120px 24px 64px; }
+    .about { grid-template-columns: 1fr; padding: 80px 24px; }
+    .about-visual { display: none; }
+    .numbers { grid-template-columns: 1fr 1fr; padding: 64px 24px; }
+    .features { padding: 80px 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .process { padding: 80px 24px; }
+    .process-step { grid-template-columns: 48px 1fr; gap: 24px; }
+    .step-body { grid-column: 2; }
+    .testimonials { padding: 80px 24px; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .pricing { padding: 80px 24px; }
+    .faq { padding: 80px 24px; }
+    .cta-banner { padding: 80px 24px; }
+    footer { padding: 48px 24px 32px; }
+    .footer-top { grid-template-columns: 1fr; gap: 32px; }
+    .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+    .mobile-menu { padding: 24px; }
+    body { cursor: auto; }
+    #cursor, #cursor-ring { display: none; }
+  }
+</style>
 </head>
 <body>
-  <h1>Hello world!</h1>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Vel<span>a</span></a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+    <a href="#process">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#" class="nav-cta">Get Started</a>
+  </div>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" onclick="toggleMenu()">About</a>
+  <a href="#features" onclick="toggleMenu()">Features</a>
+  <a href="#process" onclick="toggleMenu()">How It Works</a>
+  <a href="#pricing" onclick="toggleMenu()">Pricing</a>
+  <a href="#" onclick="toggleMenu()">Get Started</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <p class="hero-eyebrow">Introducing Vela 2.0</p>
+  <h1 class="hero-headline">The operating system<br>for <em>human potential</em></h1>
+  <p class="hero-sub">Vela unifies your teams, tools, and intelligence into one elegant platform. Move faster, decide smarter, grow without limits.</p>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary">Start Free Trial</a>
+    <a href="#features" class="btn-ghost">See How It Works</a>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker">
+    <span class="ticker-item"><span class="ticker-dot"></span>12,000+ companies trust Vela</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Series C · $180M Raised</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Named #1 Productivity Platform 2025</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SOC 2 Type II · ISO 27001 Certified</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>99.99% Uptime SLA</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>4.9 / 5 on G2 Crowd</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>12,000+ companies trust Vela</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Series C · $180M Raised</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Named #1 Productivity Platform 2025</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>SOC 2 Type II · ISO 27001 Certified</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>99.99% Uptime SLA</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>4.9 / 5 on G2 Crowd</span>
+  </div>
+</div>
+
+<!-- NUMBERS -->
+<section class="numbers" id="numbers">
+  <div class="number-card reveal">
+    <div class="num">$<span>4.2</span>B</div>
+    <div class="label">Valuation</div>
+  </div>
+  <div class="number-card reveal">
+    <div class="num"><span>12</span>K+</div>
+    <div class="label">Enterprise Clients</div>
+  </div>
+  <div class="number-card reveal">
+    <div class="num"><span>340</span>%</div>
+    <div class="label">Avg. ROI in Year One</div>
+  </div>
+  <div class="number-card reveal">
+    <div class="num"><span>180</span>+</div>
+    <div class="label">Countries Served</div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-content reveal">
+    <p class="about-label">Our Philosophy</p>
+    <h2 class="about-headline">Intelligence that<br><em>moves with you</em></h2>
+    <div class="about-body">
+      <p>Most software slows you down — buried settings, endless integrations, and dashboards that tell you nothing you didn't already know. We built Vela to be different.</p>
+      <p>Vela is an adaptive platform that learns how your team works. It surfaces the right information at the right moment, automates the tedious, and makes every decision feel effortless.</p>
+      <p>From early-stage startups to Fortune 100 enterprises, Vela scales with your ambition.</p>
+    </div>
+    <div style="margin-top: 40px;">
+      <a href="#features" class="btn-primary">Explore the Platform</a>
+    </div>
+  </div>
+  <div class="about-visual reveal">
+    <div class="about-visual-inner">
+      <div class="about-visual-chart">
+        <div class="chart-bar" style="height:40%"></div>
+        <div class="chart-bar" style="height:60%"></div>
+        <div class="chart-bar" style="height:45%"></div>
+        <div class="chart-bar" style="height:80%"></div>
+        <div class="chart-bar" style="height:65%"></div>
+        <div class="chart-bar" style="height:90%"></div>
+        <div class="chart-bar" style="height:100%"></div>
+      </div>
+      <div class="about-visual-text">Team Velocity</div>
+      <div class="about-visual-num">+340%</div>
+    </div>
+    <div class="about-visual-tag">Live Analytics</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-header reveal">
+    <p class="section-label">The Platform</p>
+    <h2 class="section-headline">Everything you need.<br>Nothing you don't.</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <h3 class="feature-title">Unified Intelligence Hub</h3>
+      <p class="feature-body">All your data, tools, and workflows converge in one adaptive workspace. Real-time insights surface automatically — no manual reporting required.</p>
+      <span class="feature-tag">AI-Powered</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-num">02</div>
+      <h3 class="feature-title">Adaptive Automation</h3>
+      <p class="feature-body">Vela learns your processes and automates repetitive tasks intelligently. Reclaim hours every week without writing a single line of code.</p>
+      <span class="feature-tag">No-Code</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-num">03</div>
+      <h3 class="feature-title">Real-Time Collaboration</h3>
+      <p class="feature-body">Your whole team in sync, always. Comment, assign, and iterate at the speed of thought — whether you're in the same room or across time zones.</p>
+      <span class="feature-tag">Live Sync</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-num">04</div>
+      <h3 class="feature-title">Enterprise Security</h3>
+      <p class="feature-body">SOC 2 Type II, ISO 27001, and GDPR compliant from day one. Bank-grade encryption with granular permissions your IT team will love.</p>
+      <span class="feature-tag">Zero-Trust</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-num">05</div>
+      <h3 class="feature-title">500+ Integrations</h3>
+      <p class="feature-body">Connects natively with Slack, Salesforce, Notion, GitHub, and 500+ more. Vela lives inside the tools your team already uses.</p>
+      <span class="feature-tag">Open API</span>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-num">06</div>
+      <h3 class="feature-title">Predictive Analytics</h3>
+      <p class="feature-body">Forecast revenue, spot bottlenecks, and predict churn before it happens. Our models are trained on 10 years of enterprise performance data.</p>
+      <span class="feature-tag">ML Engine</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process" id="process">
+  <div class="section-header reveal" style="text-align:left; margin-bottom: 0;">
+    <p class="section-label" style="color: var(--gold);">How It Works</p>
+    <h2 class="section-headline" style="color: var(--ink);">Live in days,<br>not months.</h2>
+  </div>
+  <div class="process-steps">
+    <div class="process-step reveal">
+      <div class="step-num">01</div>
+      <h3 class="step-title">Connect your stack</h3>
+      <p class="step-body">Plug in your existing tools in minutes. Vela's smart connectors auto-map your data models and surface everything in a unified view. No engineers needed.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">02</div>
+      <h3 class="step-title">Configure your workflows</h3>
+      <p class="step-body">Use our visual builder to automate the flows that matter most. Set triggers, assign owners, and define escalations — all without touching code.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">03</div>
+      <h3 class="step-title">Invite your team</h3>
+      <p class="step-body">Onboarding takes under 10 minutes. Role-based permissions ensure everyone sees exactly what they need — and nothing they don't.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">04</div>
+      <h3 class="step-title">Watch your velocity compound</h3>
+      <p class="step-body">Vela gets smarter as your team uses it. Most customers see measurable productivity gains within the first two weeks and a full ROI within 90 days.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="section-header reveal">
+    <p class="section-label">Client Stories</p>
+    <h2 class="section-headline" style="color: var(--ink);">The proof is in the outcomes.</h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="testimonial-quote">"We replaced six different tools with Vela and cut our ops overhead in half. The automation alone has saved us 200+ hours a month."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">SR</div>
+        <div>
+          <div class="author-name">Sarah R.</div>
+          <div class="author-role">COO · Meridian Health</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="testimonial-quote">"Vela's predictive analytics flagged a pipeline risk that would have cost us $2M. It paid for itself on day one. No exaggeration."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">JM</div>
+        <div>
+          <div class="author-name">James M.</div>
+          <div class="author-role">VP Sales · Nexus Capital</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <p class="testimonial-quote">"I've evaluated dozens of platforms. Vela is the first one where I don't have to fight the software. It just works, and the team behind it is incredible."</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">KL</div>
+        <div>
+          <div class="author-name">Kira L.</div>
+          <div class="author-role">CTO · Onyx Labs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="section-header reveal">
+    <p class="section-label">Pricing</p>
+    <h2 class="section-headline" style="color: var(--ink);">Simple, transparent pricing.</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <div class="pricing-tier">Starter</div>
+      <div class="pricing-price"><sup>$</sup>49</div>
+      <div class="pricing-period">per seat / month</div>
+      <ul class="pricing-features">
+        <li>Up to 10 seats</li>
+        <li>Core automation tools</li>
+        <li>5 integrations</li>
+        <li>Standard analytics</li>
+        <li>Email support</li>
+      </ul>
+      <button class="btn-outline" onclick="handleCTA('Starter')">Start Free Trial</button>
+    </div>
+    <div class="pricing-card featured reveal">
+      <div class="pricing-badge">Most Popular</div>
+      <div class="pricing-tier">Growth</div>
+      <div class="pricing-price"><sup>$</sup>129</div>
+      <div class="pricing-period">per seat / month</div>
+      <ul class="pricing-features">
+        <li>Unlimited seats</li>
+        <li>Advanced automation</li>
+        <li>Unlimited integrations</li>
+        <li>Predictive analytics</li>
+        <li>Priority support</li>
+        <li>Custom workflows</li>
+      </ul>
+      <button class="btn-outline" onclick="handleCTA('Growth')">Start Free Trial</button>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="pricing-tier">Enterprise</div>
+      <div class="pricing-price" style="font-size: 2.5rem;">Custom</div>
+      <div class="pricing-period">volume pricing</div>
+      <ul class="pricing-features">
+        <li>Dedicated infrastructure</li>
+        <li>Custom SLA (99.99%)</li>
+        <li>SSO & SCIM</li>
+        <li>White-glove onboarding</li>
+        <li>24/7 phone support</li>
+        <li>On-premise option</li>
+      </ul>
+      <button class="btn-outline" onclick="handleCTA('Enterprise')">Talk to Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-header reveal">
+    <p class="section-label">FAQ</p>
+    <h2 class="section-headline" style="color: var(--ink);">Answers to common questions.</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        How long does it take to set up Vela?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">Most teams are fully operational within 3–5 business days. Our onboarding team handles all the heavy lifting — data migration, integration configuration, and team training. For enterprise deployments, we assign a dedicated solutions architect.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        Can I migrate data from my existing tools?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">Yes. Vela supports one-click migration from Asana, Monday.com, Jira, Salesforce, HubSpot, and 40+ other platforms. Our AI automatically maps and transforms your data structures so nothing gets lost in translation.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        Is my data secure?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">Absolutely. Vela is SOC 2 Type II, ISO 27001, HIPAA, and GDPR compliant. All data is encrypted in transit (TLS 1.3) and at rest (AES-256). We offer single-tenant deployments and on-premise options for enterprises with strict data residency requirements.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        What if I need more than what's in my plan?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">Vela scales seamlessly. You can upgrade, add seats, or switch plans at any time — all prorated to the day. There are no long-term commitments on Starter and Growth plans, and our Enterprise contracts are fully customizable.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFAQ(this)">
+        Do you offer a free trial?
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">Yes — all plans include a 14-day free trial, no credit card required. You'll get full access to every feature in your selected tier. If you need more time to evaluate, just ask and we'll extend it.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="section-header reveal">
+    <p class="section-label">Get Started</p>
+    <h2 class="section-headline">Ready to <em>move faster</em><br>than your competition?</h2>
+    <p class="cta-sub">Join 12,000+ companies already using Vela to outperform, outpace, and outlast.</p>
+    <div class="cta-actions">
+      <button class="btn-primary" onclick="handleCTA('hero')">Start Free Trial</button>
+      <a href="#" style="color: rgba(245,242,236,0.5); font-size: 0.85rem; text-decoration:none; display:flex; align-items:center; gap: 8px; transition: color 0.2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(245,242,236,0.5)'">Book a Demo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">Vel<span>a</span></a>
+      <p class="footer-desc">The operating system for human potential. Trusted by 12,000+ companies across 180 countries.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Changelog</a>
+      <a href="#">Roadmap</a>
+      <a href="#">Integrations</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Press</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="#">Documentation</a>
+      <a href="#">API Reference</a>
+      <a href="#">Community</a>
+      <a href="#">Status</a>
+      <a href="#">Security</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Vela Technologies, Inc. All rights reserved.</span>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(10,10,15,0.6); z-index:1000; backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div style="background:var(--cream); padding:48px; max-width:440px; width:90%; position:relative; border: 1px solid var(--border);">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);">×</button>
+    <p style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Get Started</p>
+    <h3 style="font-family:var(--serif);font-size:1.8rem;letter-spacing:-0.025em;margin-bottom:8px;">Start your free trial</h3>
+    <p style="font-size:0.875rem;color:var(--muted);margin-bottom:32px;">14 days free. No credit card required.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <input id="modal-name" type="text" placeholder="Full name" style="padding:14px 16px;border:1px solid var(--border);background:var(--cream);font-family:var(--sans);font-size:0.9rem;outline:none;color:var(--ink);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+      <input id="modal-email" type="email" placeholder="Work email" style="padding:14px 16px;border:1px solid var(--border);background:var(--cream);font-family:var(--sans);font-size:0.9rem;outline:none;color:var(--ink);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+      <input id="modal-company" type="text" placeholder="Company name" style="padding:14px 16px;border:1px solid var(--border);background:var(--cream);font-family:var(--sans);font-size:0.9rem;outline:none;color:var(--ink);transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+      <button onclick="submitForm()" style="background:var(--ink);color:var(--cream);padding:16px;border:none;font-family:var(--sans);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:background 0.2s;" onmouseover="this.style.background='var(--gold)';this.style.color='var(--ink)'" onmouseout="this.style.background='var(--ink)';this.style.color='var(--cream)'">Create My Account →</button>
+    </div>
+    <p style="font-size:0.72rem;color:var(--muted);margin-top:16px;text-align:center;">By signing up you agree to our Terms & Privacy Policy.</p>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+  function animRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(animRing); }
+  animRing();
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add('visible'), i * 60); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Animated counters
+  function animateCounters() {
+    document.querySelectorAll('.num span').forEach(el => {
+      const end = parseFloat(el.textContent);
+      const dec = el.textContent.includes('.') ? 1 : 0;
+      let start = 0; const dur = 1600;
+      const step = timestamp => {
+        if (!start) start = timestamp;
+        const p = Math.min((timestamp - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = (end * ease).toFixed(dec);
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = end.toFixed(dec);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  const numObs = new IntersectionObserver(entries => { if (entries[0].isIntersecting) { animateCounters(); numObs.disconnect(); } }, { threshold: 0.3 });
+  numObs.observe(document.querySelector('.numbers'));
+
+  // FAQ
+  function toggleFAQ(btn) {
+    const item = btn.closest('.faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Mobile menu
+  function toggleMenu() {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // CTA Modal
+  function handleCTA(plan) {
+    const m = document.getElementById('modal');
+    m.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+  function submitForm() {
+    const name = document.getElementById('modal-name').value.trim();
+    const email = document.getElementById('modal-email').value.trim();
+    const company = document.getElementById('modal-company').value.trim();
+    if (!name || !email || !company) { alert('Please fill in all fields.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
+    const modal = document.getElementById('modal').querySelector('div');
+    modal.innerHTML = `
+      <div style="text-align:center;padding:16px 0;">
+        <div style="font-size:3rem;margin-bottom:24px;">✦</div>
+        <p style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">You're In</p>
+        <h3 style="font-family:var(--serif);font-size:1.8rem;letter-spacing:-0.025em;margin-bottom:12px;">Welcome to Vela, ${name}.</h3>
+        <p style="font-size:0.9rem;color:var(--muted);line-height:1.7;">We've sent a confirmation to <strong>${email}</strong>. Your 14-day trial starts now.</p>
+        <button onclick="closeModal()" style="margin-top:32px;background:var(--ink);color:var(--cream);padding:14px 32px;border:none;font-family:var(--sans);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;">Close</button>
+      </div>`;
+  }
+
+  // Nav scroll effect
+  const navEl = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) navEl.style.borderBottomColor = 'rgba(10,10,15,0.15)';
+    else navEl.style.borderBottomColor = 'var(--border)';
+  });
+</script>
 </body>
 </html>
