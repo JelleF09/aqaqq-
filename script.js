@@ -6,7 +6,7 @@ app.use(express.json());
 
 
 const DISCORD_WEBHOOK =
-"https://discordapp.com/api/webhooks/1404081818210140261/eqgIhBzxtjWIrnvZgvL6I2lJk5huWk2GOmBoeCZxydMdcEE_pqziaOkZd1MQDyOrY1HC";
+"YOUR_WEBHOOK";
 
 
 app.post("/collect", async(req,res)=>{
